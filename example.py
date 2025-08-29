@@ -9,8 +9,6 @@
 #     "numpy==2.3.2",
 #     "pandas==2.3.2",
 #     "polars==1.32.3",
-#     "pyobsplot==0.5.3",
-#     "pyarrow"
 #     "traitlets==5.14.3",
 # ]
 # ///
