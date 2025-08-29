@@ -9,14 +9,15 @@
 #     "numpy==2.3.2",
 #     "pandas==2.3.2",
 #     "polars==1.32.3",
-#     "pyobsplot==0.5.4",
+#     "pyobsplot==0.5.3",
+#     "pyarrow"
 #     "traitlets==5.14.3",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.15.0"
+__generated_with = "0.15.1"
 app = marimo.App(width="full")
 
 
@@ -45,7 +46,9 @@ def _(Matrix, mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""You can slide around and change each number. And as a result the underlying Python object also looks different.""")
+    mo.md(
+        r"""You can slide around and change each number. And as a result the underlying Python object also looks different."""
+    )
     return
 
 
@@ -83,26 +86,28 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(br, mat_c, mat_pca, mo, out, p):
-    mo.vstack([
-        br(), 
-        br(), 
-        mo.hstack(
-            [   
-                mat_c,
-                p("", style="width: 40px"),
-                mo.md(r"$$ {\Large \times }$$"),
-                mat_pca,
-                p("", style="width: 30px"),
-                mo.md(r"$$ {\Large = }$$"),
-                p("", style="width: 20px"),
-                out,
-            ],
-            justify="start",
-            wrap=True,
-        ),
-        br(), 
-        br()
-    ])
+    mo.vstack(
+        [
+            br(),
+            br(),
+            mo.hstack(
+                [
+                    mat_c,
+                    p("", style="width: 40px"),
+                    mo.md(r"$$ {\Large \times }$$"),
+                    mat_pca,
+                    p("", style="width: 30px"),
+                    mo.md(r"$$ {\Large = }$$"),
+                    p("", style="width: 20px"),
+                    out,
+                ],
+                justify="start",
+                wrap=True,
+            ),
+            br(),
+            br(),
+        ]
+    )
     return
 
 
@@ -113,9 +118,9 @@ def _(alt, color, mo, pca_mat, pd, rgb_mat):
 
     pca_chart = (
         alt.Chart(df_pca)
-            .mark_point()
-            .encode(x="x", y="y", color=alt.Color('c:N', scale = None))
-            .properties(width=400, height=400)
+        .mark_point()
+        .encode(x="x", y="y", color=alt.Color("c:N", scale=None))
+        .properties(width=400, height=400)
     )
 
     mo.hstack([pca_mat, pca_chart])
@@ -143,11 +148,11 @@ def _(Matrix, mo, np):
         Matrix(np.random.normal(0, 1, size=(3, 2)), step=0.1, row_names=["R", "G", "B"])
     )
     rgb_mat = np.random.randint(0, 255, size=(1000, 3))
-    color = ["#{0:02x}{1:02x}{2:02x}".format(r, g, b) for r,g,b in rgb_mat]
+    color = ["#{0:02x}{1:02x}{2:02x}".format(r, g, b) for r, g, b in rgb_mat]
 
-    rgb_df = pd.DataFrame({
-        "r": rgb_mat[:, 0], "g": rgb_mat[:, 1], "b": rgb_mat[:, 2], 'color': color
-    })
+    rgb_df = pd.DataFrame(
+        {"r": rgb_mat[:, 0], "g": rgb_mat[:, 1], "b": rgb_mat[:, 2], "color": color}
+    )
     return alt, color, pca_mat, pd, rgb_mat
 
 
@@ -188,7 +193,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(arrow_plot, mat_mul, mat_point, mo, p, step_slider):
+def _(mark_arrow_with_text, mat_mul, mat_point, mo, p, step_slider):
     latex = mo.hstack(
         [
             mat_point,
@@ -203,7 +208,7 @@ def _(arrow_plot, mat_mul, mat_point, mo, p, step_slider):
         wrap=True,
     )
 
-    mo.hstack([latex, mo.vstack([step_slider, arrow_plot])])
+    mo.hstack([latex, mo.vstack([step_slider, mark_arrow_with_text])])
     return
 
 
@@ -228,42 +233,22 @@ def _(df_forward, pl):
     return (df_arrows,)
 
 
+@app.cell
+def _(df_arrows):
+    df_arrows
+    return
+
+
 @app.cell(hide_code=True)
-def _(Plot, df_arrows, df_forward, pl):
+def _(alt, df_arrows, df_forward, pl):
     metros = pl.DataFrame(
         [{"x1": 0, "x2": 1, "y1": 1, "y2": 2}, {"x1": 1, "x2": 1.5, "y1": 2, "y2": 3}]
     )
 
-    arrow_plot = Plot.plot(
-        {
-            "height": 400,
-            "width": 400,
-            "grid": True,
-            "inset": 10,
-            "x": {"label": "x →"},
-            "y": {"label": "↑ y", "ticks": 4},
-            "marks": [
-                Plot.arrow(
-                    df_arrows,
-                    {
-                        "x1": "x1",
-                        "y1": "y1",
-                        "x2": "x2",
-                        "y2": "y2",
-                        "bend": False,
-                        "stroke": "gray",
-                    },
-                ),
-                Plot.dot(df_forward, {"x": "x", "y": "y", "fill": "black"}),
-            ],
-        }
-    )
-    return (arrow_plot,)
-
-
-@app.cell
-def _():
-    return
+    mark_arrow_with_text = alt.Chart(df_arrows).mark_line(size=2).encode(
+        x="x1", y="y1", x2="x2", y2="y2"
+    ) + alt.Chart(df_forward).mark_point(color="black").encode(x="x", y="y")
+    return (mark_arrow_with_text,)
 
 
 @app.cell(hide_code=True)
@@ -278,7 +263,7 @@ def _():
     import numpy as np
     import polars as pl
     from pyobsplot import Plot
-    return Plot, mo, np, pl
+    return mo, np, pl
 
 
 @app.cell
