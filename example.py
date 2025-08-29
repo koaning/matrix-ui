@@ -260,7 +260,6 @@ def _():
     import marimo as mo
     import numpy as np
     import polars as pl
-    from pyobsplot import Plot
     return mo, np, pl
 
 
