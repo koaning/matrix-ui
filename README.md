@@ -1,0 +1,1 @@
+This repository hosts an example notebook as an appendix for [this video](https://youtu.be/dVrkzc_arE8). It features [marimo](https://marimo.io/), [anywidget](https://anywidget.dev/) and [wigglystuff](https://github.com/koaning/wigglystuff) playing nice together to help you understand matrices in a new way. 
